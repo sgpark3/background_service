@@ -25,15 +25,16 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
+// import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugin.common.JSONMethodCodec;
 
 /** BackgroundServicePlugin */
-public class BackgroundServicePlugin extends BroadcastReceiver implements FlutterPlugin, MethodCallHandler, ServiceAware {
+public class BackgroundServicePlugin extends BroadcastReceiver
+    implements FlutterPlugin, MethodCallHandler, ServiceAware {
   private static final String TAG = "BackgroundService";
   private static final List<BackgroundServicePlugin> _instances = new ArrayList<>();
 
-  public BackgroundServicePlugin(){
+  public BackgroundServicePlugin() {
     _instances.add(this);
   }
 
@@ -51,15 +52,18 @@ public class BackgroundServicePlugin extends BroadcastReceiver implements Flutte
     channel.setMethodCallHandler(this);
   }
 
-  public static void registerWith(Registrar registrar) {
-    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(registrar.context());
-    final BackgroundServicePlugin plugin = new BackgroundServicePlugin();
-    localBroadcastManager.registerReceiver(plugin, new IntentFilter("id.flutter/background_service"));
+  // public static void registerWith(Registrar registrar) {
+  // LocalBroadcastManager localBroadcastManager =
+  // LocalBroadcastManager.getInstance(registrar.context());
+  // final BackgroundServicePlugin plugin = new BackgroundServicePlugin();
+  // localBroadcastManager.registerReceiver(plugin, new
+  // IntentFilter("id.flutter/background_service"));
 
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "id.flutter/background_service");
-    channel.setMethodCallHandler(plugin);
-    plugin.channel = channel;
-  }
+  // final MethodChannel channel = new MethodChannel(registrar.messenger(),
+  // "id.flutter/background_service");
+  // channel.setMethodCallHandler(plugin);
+  // plugin.channel = channel;
+  // }
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
@@ -75,7 +79,7 @@ public class BackgroundServicePlugin extends BroadcastReceiver implements Flutte
         BackgroundService.setCallbackDispatcher(context, callbackHandle, isForeground, autoStartOnBoot);
 
         Intent intent = new Intent(context, BackgroundService.class);
-        if (isForeground){
+        if (isForeground) {
           ContextCompat.startForegroundService(context, intent);
         } else {
           context.startService(intent);
@@ -110,7 +114,7 @@ public class BackgroundServicePlugin extends BroadcastReceiver implements Flutte
       }
 
       result.notImplemented();
-    }catch (Exception e){
+    } catch (Exception e) {
       result.error("100", "Failed read arguments", null);
     }
   }
@@ -125,15 +129,16 @@ public class BackgroundServicePlugin extends BroadcastReceiver implements Flutte
 
   @Override
   public void onReceive(Context context, Intent intent) {
-    if (intent.getAction() == null) return;
+    if (intent.getAction() == null)
+      return;
 
-    if (intent.getAction().equalsIgnoreCase("id.flutter/background_service")){
+    if (intent.getAction().equalsIgnoreCase("id.flutter/background_service")) {
       String data = intent.getStringExtra("data");
       try {
-        if (channel != null){
+        if (channel != null) {
           channel.invokeMethod("onReceiveData", data);
         }
-      } catch (Exception e){
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }

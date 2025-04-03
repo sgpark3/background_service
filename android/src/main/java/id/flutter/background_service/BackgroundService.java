@@ -71,7 +71,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.view.FlutterCallbackInformation;
-import io.flutter.view.FlutterMain;
+// import io.flutter.view.FlutterMain;
 
 public class BackgroundService extends Service implements MethodChannel.MethodCallHandler {
     private static final String TAG = "BackgroundService";
@@ -96,7 +96,8 @@ public class BackgroundService extends Service implements MethodChannel.MethodCa
         return null;
     }
 
-    public static void setCallbackDispatcher(Context context, long callbackHandleId, boolean isForeground, boolean autoStartOnBoot) {
+    public static void setCallbackDispatcher(Context context, long callbackHandleId, boolean isForeground,
+            boolean autoStartOnBoot) {
         SharedPreferences pref = context.getSharedPreferences("id.flutter.background_service", MODE_PRIVATE);
         pref.edit()
                 .putLong("callback_handle", callbackHandleId)
@@ -166,10 +167,10 @@ public class BackgroundService extends Service implements MethodChannel.MethodCa
                         }
                         break;
                     case BluetoothAdapter.STATE_TURNING_ON:
-                        Log.d(TAG,"STATE_TURNING_ON");
+                        Log.d(TAG, "STATE_TURNING_ON");
                         break;
                     case BluetoothAdapter.STATE_TURNING_OFF:
-                        Log.d(TAG,"STATE_TURNING_OFF");
+                        Log.d(TAG, "STATE_TURNING_OFF");
                         break;
                 }
             } else if (action.equals(LocationManager.PROVIDERS_CHANGED_ACTION)) {
@@ -249,22 +250,28 @@ public class BackgroundService extends Service implements MethodChannel.MethodCa
     }
 
     private boolean checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             notificationTitle = "위치정보 사용권한이 없습니다.";
             notificationContent = "여기를 터치하고 위치정보 사용을 허가해 주세요.";
             return false;
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
                     notificationTitle = "신체정보 사용권한이 없습니다.";
                     notificationContent = "여기를 터치하고 신체정보 사용을 허가해 주세요.";
                     return false;
                 } else {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-                                || ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
-                                || ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED) {
+                        if (ContextCompat.checkSelfPermission(this,
+                                Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
+                                || ContextCompat.checkSelfPermission(this,
+                                        Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
+                                || ContextCompat.checkSelfPermission(this,
+                                        Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED) {
                             notificationTitle = "근처 기기 사용권한이 부족합니다.";
                             notificationContent = "여기를 터치하고 근처 기기 사용 권한을 허용해주세요.";
                             return false;
@@ -318,7 +325,8 @@ public class BackgroundService extends Service implements MethodChannel.MethodCa
 
             PendingIntent pi;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                pi = PendingIntent.getActivity(BackgroundService.this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                pi = PendingIntent.getActivity(BackgroundService.this, 1, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             } else {
                 pi = PendingIntent.getActivity(BackgroundService.this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
@@ -367,15 +375,23 @@ public class BackgroundService extends Service implements MethodChannel.MethodCa
 
             isRunning.set(true);
             backgroundEngine = new FlutterEngine(this);
-            backgroundEngine.getServiceControlSurface().attachToService(BackgroundService.this, null, isForegroundService(this));
+            backgroundEngine.getServiceControlSurface().attachToService(BackgroundService.this, null,
+                    isForegroundService(this));
 
-            methodChannel = new MethodChannel(backgroundEngine.getDartExecutor().getBinaryMessenger(), "id.flutter/background_service_bg");
+            methodChannel = new MethodChannel(backgroundEngine.getDartExecutor().getBinaryMessenger(),
+                    "id.flutter/background_service_bg");
 
-            final EventChannel bluetoothStateChannel = new EventChannel(backgroundEngine.getDartExecutor().getBinaryMessenger(), ChannelName.ADAPTER_STATE_CHANGES);
-            final EventChannel restoreStateChannel = new EventChannel(backgroundEngine.getDartExecutor().getBinaryMessenger(), ChannelName.STATE_RESTORE_EVENTS);
-            final EventChannel scanningChannel = new EventChannel(backgroundEngine.getDartExecutor().getBinaryMessenger(), ChannelName.SCANNING_EVENTS);
-            final EventChannel connectionStateChannel = new EventChannel(backgroundEngine.getDartExecutor().getBinaryMessenger(), ChannelName.CONNECTION_STATE_CHANGE_EVENTS);
-            final EventChannel characteristicMonitorChannel = new EventChannel(backgroundEngine.getDartExecutor().getBinaryMessenger(), ChannelName.MONITOR_CHARACTERISTIC);
+            final EventChannel bluetoothStateChannel = new EventChannel(
+                    backgroundEngine.getDartExecutor().getBinaryMessenger(), ChannelName.ADAPTER_STATE_CHANGES);
+            final EventChannel restoreStateChannel = new EventChannel(
+                    backgroundEngine.getDartExecutor().getBinaryMessenger(), ChannelName.STATE_RESTORE_EVENTS);
+            final EventChannel scanningChannel = new EventChannel(
+                    backgroundEngine.getDartExecutor().getBinaryMessenger(), ChannelName.SCANNING_EVENTS);
+            final EventChannel connectionStateChannel = new EventChannel(
+                    backgroundEngine.getDartExecutor().getBinaryMessenger(),
+                    ChannelName.CONNECTION_STATE_CHANGE_EVENTS);
+            final EventChannel characteristicMonitorChannel = new EventChannel(
+                    backgroundEngine.getDartExecutor().getBinaryMessenger(), ChannelName.MONITOR_CHARACTERISTIC);
 
             methodChannel.setMethodCallHandler(this);
 
@@ -385,10 +401,13 @@ public class BackgroundService extends Service implements MethodChannel.MethodCa
             connectionStateChannel.setStreamHandler(this.connectionStateStreamHandler);
             characteristicMonitorChannel.setStreamHandler(this.characteristicsMonitorStreamHandler);
 
-            dartCallback = new DartExecutor.DartCallback(getAssets(), FlutterInjector.instance().flutterLoader().findAppBundlePath(), callback);
+            dartCallback = new DartExecutor.DartCallback(getAssets(),
+                    FlutterInjector.instance().flutterLoader().findAppBundlePath(), callback);
             backgroundEngine.getDartExecutor().executeDartCallback(dartCallback);
         } catch (UnsatisfiedLinkError e) {
-            Log.w(TAG, "UnsatisfiedLinkError: After a reboot this may happen for a short period and it is ok to ignore then!" + e.getMessage());
+            Log.w(TAG,
+                    "UnsatisfiedLinkError: After a reboot this may happen for a short period and it is ok to ignore then!"
+                            + e.getMessage());
         }
     }
 
@@ -409,7 +428,8 @@ public class BackgroundService extends Service implements MethodChannel.MethodCa
     private void createClient(MethodCall call, MethodChannel.Result result) {
         try {
             if (bleAdapter != null) {
-                Log.w(TAG, "Overwriting existing native client. Use BleManager#isClientCreated to check whether a client already exists.");
+                Log.w(TAG,
+                        "Overwriting existing native client. Use BleManager#isClientCreated to check whether a client already exists.");
             }
             setupAdapter(getApplicationContext());
             bleAdapter.createClient(call.<String>argument(ArgumentKey.RESTORE_STATE_IDENTIFIER),
@@ -518,11 +538,11 @@ public class BackgroundService extends Service implements MethodChannel.MethodCa
                 return;
             }
             if (method.equalsIgnoreCase("setNotificationInfo")) {
-                    notificationTitle = call.<String>argument("title");
-                    notificationContent = call.<String>argument("content");
-                    updateNotificationInfo();
-                    result.success(true);
-                    return;
+                notificationTitle = call.<String>argument("title");
+                notificationContent = call.<String>argument("content");
+                updateNotificationInfo();
+                result.success(true);
+                return;
             }
 
             if (method.equalsIgnoreCase("setAutoStartOnBootMode")) {
